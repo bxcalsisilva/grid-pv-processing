@@ -3,8 +3,6 @@ import requests
 from datetime import date
 import pandas as pd
 
-import time
-
 import schemas
 import utils
 import filters
@@ -20,31 +18,35 @@ systems = requests.get(f"{config.api_url}/systems/").json()
 systems = [schemas.System(**dct) for dct in systems]
 
 day = date.today()
-
-day = day.date()
-start = time.time()
+# day = date(2022, 6, 16)
 
 for loc in locations:
-    filepath = utils.daq_filepath(config.local_folder, loc.loc, loc.daq, day)
-    # print(f"daq {loc.loc} file exists: ", filepath.exists())
-
-    names = config.daq_colnames.__getattribute__(loc.loc)
-    df_daq = utils.read_file(filepath, names, day)
-    # print(f"daq {loc.loc} length: ", df_daq.__len__())
-
-    irr_colname = config.irr_colname.__getattribute__(loc.loc)
-    df_irr = utils.get_variable(df_daq, irr_colname)
-
+    print(loc.loc)
     systems = utils.get_systems(config.api_url, loc.loc)
+
     for sys in systems:
         print(sys.sys)
-        filepath = utils.sfcr_filepath(
+
+        daq_filename = config.daq.__getattribute__(loc.loc)
+        daq_filepath = utils.daq_filepath(
+            config.local_folder, loc.loc, daq_filename, day
+        )
+        # print(f"daq {loc.loc} file exists: ", filepath.exists())
+
+        daq_names = config.daq_colnames.__getattribute__(loc.loc)
+        df_daq = utils.read_file(daq_filepath, daq_names, day)
+        # print(f"daq {loc.loc} length: ", df_daq.__len__())
+
+        irr_colname = config.irr_colname.__getattribute__(loc.loc)
+        df_irr = utils.get_variable(df_daq, irr_colname)
+
+        sfcr_filepath = utils.sfcr_filepath(
             config.local_folder, sys.loc, sys.sfcr, sys.mod, day
         )
         # print(f"sfcr {sys.sys} file exists: ", filepath.exists())
 
-        names = config.sfcr_colnames
-        df_sfcr = utils.read_file(filepath, names, day)
+        sfcr_names = config.sfcr_colnames
+        df_sfcr = utils.read_file(sfcr_filepath, sfcr_names, day)
         # print(f"sfcr {sys.sys} length: ", df_daq.__len__())
 
         df_tmod_c = utils.get_variable(df_daq, f"t_mod_c_{sys.mod}")
@@ -149,6 +151,3 @@ for loc in locations:
             sys.p_m,
             config.api_url,
         )
-
-end = time.time()
-print(f"Processing of all systems took {round(end - start, 2)} seconds")

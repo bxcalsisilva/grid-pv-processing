@@ -21,9 +21,19 @@ class IrrColname(BaseModel):
     unsa: str
 
 
+class DAQs(BaseModel):
+    pucp: str
+    uni: str
+    untrm: str
+    unaj: str
+    unjbg: str
+    unsa: str
+
+
 class Configuration(BaseModel):
     api_url: str
     local_folder: Path
+    daq: DAQs
     irr_colname: IrrColname
     sfcr_colnames: list[str]
     daq_colnames: DaqColnames

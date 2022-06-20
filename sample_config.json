@@ -1,6 +1,14 @@
 {
     "api_url": "http://localhost:8000/processed",
     "local_folder": "/home/bcalsi/Documents/SFCR_Aplicada",
+    "daq": {
+        "pucp": "daq-ms80m",
+        "uni": "daq-ms80m",
+        "untrm": "daq-ms80m",
+        "unaj": "daq",
+        "unjbg": "daq-ms80s",
+        "unsa": "daq"
+    },
     "irr_colname": {
         "pucp": "pyr",
         "uni": "pyr",

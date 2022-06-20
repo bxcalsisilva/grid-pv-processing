@@ -72,15 +72,19 @@ def read_file(filepath: Path, names: list[str], day: date):
         df.reset_index(inplace=True)
 
     except FileNotFoundError:
+        print("filenorfounderror", day, filepath)
         df = pd.DataFrame(columns=names)
         df["dt"] = df["day"] + " " + df["time"]
         df.drop(labels=["day", "time"], axis="columns", inplace=True)
-
     return df
 
 
 def get_variable(df: pd.DataFrame, colname):
-    df = df[["dt", colname]].copy()
+    df = df.copy()
+    try:
+        df = df[["dt", colname]]
+    except KeyError:
+        return pd.DataFrame(columns=["dt", "val"])
     df.rename({colname: "val"}, axis="columns", inplace=True)
     df.dropna(inplace=True)
 
@@ -88,6 +92,7 @@ def get_variable(df: pd.DataFrame, colname):
 
 
 def post_irr(df, loc: str, api_url: str):
+    df = df.copy()
     df = df[["dt", "val"]].copy().dropna()
     if df.empty:
         print(f"Irradiances empty")
