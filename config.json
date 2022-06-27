@@ -1,5 +1,5 @@
 {
-    "api_url": "http://localhost:8000/processed",
+    "api_url": "http://ec2-54-232-67-195.sa-east-1.compute.amazonaws.com:8000/processed",
     "local_folder": "/home/bcalsi/Documents/SFCR_Aplicada",
     "daq": {
         "pucp": "daq-ms80m",
@@ -7,7 +7,7 @@
         "untrm": "daq-ms80m",
         "unaj": "daq",
         "unjbg": "daq-ms80s",
-        "unsa": "daq"
+        "unsa": "daq-ms80s"
     },
     "irr_colname": {
         "pucp": "pyr",
@@ -15,7 +15,7 @@
         "untrm": "pyr",
         "unaj": "mini_1",
         "unjbg": "pyr",
-        "unsa": "kip"
+        "unsa": "pyr"
     },
     "sfcr_colnames": [
         "day",
@@ -117,7 +117,8 @@
             "t_mod_c_perc",
             "t_mod_s_perc",
             "t_mod_c_hit",
-            "t_mod_s_hit"
+            "t_mod_s_hit",
+            "pyr"
         ]
     }
 }

@@ -1,9 +1,11 @@
 import pandas as pd
 from datetime import datetime, date, timedelta, time
+import logging
 
 
 def select_range(df: pd.DataFrame, column: str, lower_limit: float, upper_limit: float):
     df = df[(lower_limit <= df[column]) & (df[column] <= upper_limit)]
+    logging.info(f"Selected range filter, new len: {df.__len__()}")
     return df
 
 
@@ -21,91 +23,96 @@ def dead_values(
     else:
         mask = ~(derivative > df["derivative"])
         df = df[mask]
+    logging.info(f"Dead values filter, new len: {df.__len__()}")
     return df
 
 
 def abrupt_change(df: pd.DataFrame, upper_limit: float):
     df = df[df["derivative"] <= upper_limit]
-
+    logging.info(f"Abrupt change filter, new len: {df.__len__()}")
     return df
 
 
 def irradiance(dt: list[datetime], val: list[float], day: date):
-    data = pd.DataFrame(dict(dt=dt, val=val))
-    data["dt"] = pd.to_datetime(data["dt"])
+    df = pd.DataFrame(dict(dt=dt, val=val))
+    df["dt"] = pd.to_datetime(df["dt"])
 
-    data["date"] = day.strftime("%Y-%m-%d")
-    data["time"] = data["dt"].dt.strftime("%H:%M:%S")
-    data["dt"] = data["date"] + " " + data["time"]
+    df["date"] = day.strftime("%Y-%m-%d")
+    df["time"] = df["dt"].dt.strftime("%H:%M:%S")
+    df["dt"] = df["date"] + " " + df["time"]
 
-    data["dt"] = pd.to_datetime(data["dt"])
+    df["dt"] = pd.to_datetime(df["dt"])
 
-    if data.empty:
+    logging.info(f"Irradiance len: {df.__len__()}")
+
+    if df.empty:
         return pd.DataFrame(columns=["dt", "val"])
 
     # resample per minute basis
-    data = data.resample("1min", on="dt").mean().reset_index()
+    df = df.resample("1min", on="dt").mean().reset_index()
 
-    data.sort_values(by="dt", inplace=True, ignore_index=True)
+    df.sort_values(by="dt", inplace=True, ignore_index=True)
 
     # daylight hours
-    data = data[data["val"] >= 20]
+    df = df[df["val"] >= 20]
 
     # Filter values outside reasonable bounds
-    data = select_range(
-        data,
+    df = select_range(
+        df,
         column="val",
         lower_limit=-6,
         upper_limit=1500,
     )
 
-    data["derivative"] = derivative(data, column="val")
-    data = dead_values(
-        data,
+    df["derivative"] = derivative(df, column="val")
+    df = dead_values(
+        df,
         derivative=0.0001,
         column="val",
         lower_limit=5,
     )
-    data = abrupt_change(data, upper_limit=800)
+    df = abrupt_change(df, upper_limit=800)
 
-    data.dropna(inplace=True)
-    data["val"] = data["val"].round(4)
-    return data
+    df.dropna(inplace=True)
+    df["val"] = df["val"].round(4)
+    return df
 
 
 def module_temperature(dt: list[datetime], val: list[float], day: date):
-    data = pd.DataFrame(dict(dt=dt, val=val))
-    data["dt"] = pd.to_datetime(data["dt"])
+    df = pd.DataFrame(dict(dt=dt, val=val))
+    df["dt"] = pd.to_datetime(df["dt"])
 
-    if data.empty:
+    logging.info(f"Module temperature len: {df.__len__()}")
+
+    if df.empty:
         return pd.DataFrame(columns=["dt", "val"])
 
-    data["date"] = day.strftime("%Y-%m-%d")
-    data["time"] = data["dt"].dt.strftime("%H:%M:%S")
-    data["dt"] = data["date"] + " " + data["time"]
+    df["date"] = day.strftime("%Y-%m-%d")
+    df["time"] = df["dt"].dt.strftime("%H:%M:%S")
+    df["dt"] = df["date"] + " " + df["time"]
 
-    data["dt"] = pd.to_datetime(data["dt"])
+    df["dt"] = pd.to_datetime(df["dt"])
 
     # resample per minute basis
-    data = data.resample("1min", on="dt").mean().reset_index()
+    df = df.resample("1min", on="dt").mean().reset_index()
 
-    data.sort_values(by="dt", inplace=True, ignore_index=True)
+    df.sort_values(by="dt", inplace=True, ignore_index=True)
 
     # range
-    data = select_range(
-        data,
+    df = select_range(
+        df,
         column="val",
         lower_limit=-30,
         upper_limit=50,
     )
 
-    data["derivative"] = derivative(data, column="val")
-    data = dead_values(data, derivative=0.0001)
-    data = abrupt_change(data, upper_limit=4)
+    df["derivative"] = derivative(df, column="val")
+    df = dead_values(df, derivative=0.0001)
+    df = abrupt_change(df, upper_limit=4)
 
-    data.dropna(inplace=True)
-    data["val"] = data["val"].round(4)
-    return data
+    df.dropna(inplace=True)
+    df["val"] = df["val"].round(4)
+    return df
 
 
 def module_temperatures(
@@ -140,36 +147,38 @@ def module_temperatures(
 
 
 def power(dt: list[datetime], val: list[float], p_m: float, day: date):
-    data = pd.DataFrame(dict(dt=dt, val=val))
-    data["dt"] = pd.to_datetime(data["dt"])
+    df = pd.DataFrame(dict(dt=dt, val=val))
+    df["dt"] = pd.to_datetime(df["dt"])
 
-    if data.empty:
+    logging.info(f"Power len: {df.__len__()}")
+
+    if df.empty:
         return pd.DataFrame(columns=["dt", "val"])
 
-    data["date"] = day.strftime("%Y-%m-%d")
-    data["time"] = data["dt"].dt.strftime("%H:%M:%S")
-    data["dt"] = data["date"] + " " + data["time"]
+    df["date"] = day.strftime("%Y-%m-%d")
+    df["time"] = df["dt"].dt.strftime("%H:%M:%S")
+    df["dt"] = df["date"] + " " + df["time"]
 
-    data["dt"] = pd.to_datetime(data["dt"])
+    df["dt"] = pd.to_datetime(df["dt"])
 
     # resample per minute basis
-    data = data.resample("1min", on="dt").mean().reset_index()
+    df = df.resample("1min", on="dt").mean().reset_index()
 
-    data.sort_values(by="dt", inplace=True, ignore_index=True)
+    df.sort_values(by="dt", inplace=True, ignore_index=True)
 
-    data = select_range(
-        data,
+    df = select_range(
+        df,
         column="val",
         lower_limit=-0.01 * p_m,
         upper_limit=1.2 * p_m,
     )
 
-    data["derivative"] = derivative(data, column="val")
-    data = abrupt_change(data, upper_limit=0.8 * p_m)
+    df["derivative"] = derivative(df, column="val")
+    df = abrupt_change(df, upper_limit=0.8 * p_m)
 
-    data.dropna(inplace=True)
-    data["val"] = data["val"].round(4)
-    return data
+    df.dropna(inplace=True)
+    df["val"] = df["val"].round(4)
+    return df
 
 
 def corroborate_measurement(dts: list[datetime], day: date):
