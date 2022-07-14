@@ -60,18 +60,18 @@ def irradiance(dt: list[datetime], val: list[float], day: date):
     df = select_range(
         df,
         column="val",
-        lower_limit=-6,
-        upper_limit=1500,
+        lower_limit=20,
+        upper_limit=2000,
     )
 
-    df["derivative"] = derivative(df, column="val")
-    df = dead_values(
-        df,
-        derivative=0.0001,
-        column="val",
-        lower_limit=5,
-    )
-    df = abrupt_change(df, upper_limit=800)
+    # df["derivative"] = derivative(df, column="val")
+    # df = dead_values(
+    #     df,
+    #     derivative=0.0001,
+    #     column="val",
+    #     lower_limit=5,
+    # )
+    # df = abrupt_change(df, upper_limit=800)
 
     df.dropna(inplace=True)
     df["val"] = df["val"].round(4)
@@ -103,12 +103,12 @@ def module_temperature(dt: list[datetime], val: list[float], day: date):
         df,
         column="val",
         lower_limit=-30,
-        upper_limit=50,
+        upper_limit=70,
     )
 
-    df["derivative"] = derivative(df, column="val")
-    df = dead_values(df, derivative=0.0001)
-    df = abrupt_change(df, upper_limit=4)
+    # df["derivative"] = derivative(df, column="val")
+    # df = dead_values(df, derivative=0.0001)
+    # df = abrupt_change(df, upper_limit=4)
 
     df.dropna(inplace=True)
     df["val"] = df["val"].round(4)
@@ -170,11 +170,11 @@ def power(dt: list[datetime], val: list[float], p_m: float, day: date):
         df,
         column="val",
         lower_limit=-0.01 * p_m,
-        upper_limit=1.2 * p_m,
+        upper_limit=1.05 * p_m,
     )
 
-    df["derivative"] = derivative(df, column="val")
-    df = abrupt_change(df, upper_limit=0.8 * p_m)
+    # df["derivative"] = derivative(df, column="val")
+    # df = abrupt_change(df, upper_limit=0.8 * p_m)
 
     df.dropna(inplace=True)
     df["val"] = df["val"].round(4)

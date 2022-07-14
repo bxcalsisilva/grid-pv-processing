@@ -60,7 +60,6 @@ def read_file(filepath: Path, names: list[str], day: date):
 
         day = day.strftime("%Y-%m-%d")
         df["day"] = day
-
         df["dt"] = df["day"] + " " + df["time"]
         df["dt"] = pd.to_datetime(df["dt"])
 
@@ -105,12 +104,13 @@ def post_irr(df, loc: str, api_url: str):
 
     if response.status_code != 200:
         print(f"Irradiances post response {response.status_code}")
+        print(df)
 
 
 def post_tmod(df, sys: str, api_url: str):
     df = df[["dt", "val"]].copy().dropna()
     if df.empty:
-        print(f"Irradiances empty")
+        print(f"tmod empty")
         return
     df.sort_values("dt", ignore_index=True, inplace=True)
     df["dt"] = df["dt"].astype(str)
@@ -120,12 +120,13 @@ def post_tmod(df, sys: str, api_url: str):
 
     if response.status_code != 200:
         print(f"Temp Mod post response {response.status_code}")
+        print(df)
 
 
 def post_power(df, sys: str, typ: str, api_url: str):
     df = df[["dt", "val"]].copy().dropna()
     if df.empty:
-        print(f"Irradiances empty")
+        print(f"Power empty")
         return
     df.sort_values("dt", ignore_index=True, inplace=True)
     df["dt"] = df["dt"].astype(str)
@@ -136,6 +137,7 @@ def post_power(df, sys: str, typ: str, api_url: str):
 
     if response.status_code != 200:
         print(f"Powers post response {response.status_code}")
+        print(df)
 
 
 def energy(dt: list[datetime], val: list[float]):
@@ -183,6 +185,7 @@ def post_energy(sys: str, typ: str, day: date, energy: float, api_url: str):
 
     if response.status_code != 200:
         print(f"Energy {typ} POST response {response.status_code}")
+        print(json)
 
 
 def post_yield(sys: str, typ: str, day: date, e: float, nominal: float, api_url: str):
@@ -196,6 +199,7 @@ def post_yield(sys: str, typ: str, day: date, e: float, nominal: float, api_url:
 
     if response.status_code != 200:
         print(f"Yield {typ} POST response {response.status_code}")
+        print(json)
 
 
 def post_efficiency(
@@ -219,6 +223,7 @@ def post_efficiency(
 
     if response.status_code != 200:
         print(f"Efficiency POST response {response.status_code}")
+        print(json)
 
 
 def post_performance_ratio(
@@ -247,3 +252,4 @@ def post_performance_ratio(
     response = requests.post(f"{api_url}/performance_ratios/", json=json)
     if response.status_code != 200:
         print(f"PR POST response {response.status_code}")
+        print(json)

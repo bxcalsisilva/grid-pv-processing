@@ -2,12 +2,13 @@ import json
 import requests
 from datetime import date
 import pandas as pd
+from pathlib import Path
 
-import schemas
-import utils
-import filters
+import schemas, utils, filters
 
-config = json.load(open("config.json"))
+filepath_config = Path(__file__).parent.parent / "config.json"
+
+config = json.load(open(filepath_config))
 config = schemas.Configuration(**config)
 
 locations = requests.get(f"{config.api_url}/locations/").json()
@@ -18,6 +19,7 @@ systems = requests.get(f"{config.api_url}/systems/").json()
 systems = [schemas.System(**dct) for dct in systems]
 
 day = date.today()
+day = date(2022, 7, 12)
 
 for loc in locations:
     print(loc.loc)
