@@ -19,7 +19,6 @@ systems = requests.get(f"{config.api_url}/systems/").json()
 systems = [schemas.System(**dct) for dct in systems]
 
 day = date.today()
-day = date(2022, 7, 12)
 
 for loc in locations:
     print(loc.loc)
